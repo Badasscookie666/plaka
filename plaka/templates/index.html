@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Fruit_and_vegetables_on_a_market_stall.svg/1200px-Fruit_and_vegetables_on_a_market_stall.svg.png" type="image/png">
+    <title>PLAKA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Body and Background - Modern Dark Accents */
+        body {
+            font-family: 'Inter', sans-serif; /* Modern sans-serif font */
+            margin: 0;
+            padding: 40px 20px; /* More padding */
+            background-color: #111120; /* Dark background */
+            color: #e0e0e0; /* Light text color for contrast */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Main Wrapper for Two Columns */
+        .main-wrapper {
+            display: flex;
+            gap: 40px; /* More space between columns */
+            width: 100%;
+            max-width: 1500px; /* Wider layout */
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+
+        /* Form Container & Preview Container - White Rounded Boxes */
+        .form-container,
+        .preview-container {
+            flex: 1; /* Takes up available space */
+            background-color: #ffffff; /* White background */
+            padding: 40px; /* Consistent padding */
+            border-radius: 16px; /* More rounded corners */
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.2); /* Stronger, softer shadow */
+            animation: fadeIn 0.7s ease-out;
+            border: none; /* No explicit border */
+            min-width: 480px; /* Ensure content readability */
+            box-sizing: border-box; /* Include padding in width */
+            color: #333; /* Dark text inside white boxes */
+        }
+
+        /* Preview Container specific styles */
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Align content to top */
+            align-items: center;
+            text-align: center;
+            font-size: 1.1em;
+            min-height: 600px; /* Ensure it has some height */
+            overflow-y: auto; /* Allow scrolling if content overflows */
+        }
+        .preview-container h2 {
+            color: #333; /* Darker heading for preview */
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+        .preview-container p {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        .preview-container .document-preview {
+            width: 4in; /* Match Word document width */
+            height: 6in; /* Match Word document height */
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.2in; /* Match Word margins */
+            overflow: hidden; /* Hide overflow to simulate single page */
+            box-sizing: border-box;
+            position: relative; /* For absolute positioning of elements if needed */
+        }
+
+        /* Styles for preview elements to mimic Word document */
+        .preview-logo {
+            max-width: 1.5in; /* Max width for logos */
+            height: auto;
+            margin-bottom: 0; /* No margin-bottom, controlled by next element */
+        }
+        .preview-empty-line-lg {
+            height: 38px; /* Approx font-size 38 height */
+            width: 100%;
+            margin-bottom: 16px; /* Equivalent to Pt(12) spacing after */
+        }
+        .preview-text {
+            text-align: center;
+            margin-bottom: 0; /* Default, will be overridden by JS for specific elements */
+            line-height: 1; /* Tight line height for the text itself */
+            font-family: 'Calibri', sans-serif; /* Default font */
+            color: #333;
+            font-size: 11pt; /* Default font size */
+            font-weight: normal;
+        }
+        .preview-text.bold { font-weight: bold; }
+        .preview-text.italic { font-style: italic; }
+        .preview-text.underline { text-decoration: underline; }
+        .preview-text.red { color: red; }
+        .preview-text.highlight {
+            background-color: #d3d3d3; /* Light grey for highlight */
+            padding: 0 2px; /* Small padding for highlight effect */
+            border-radius: 2px;
+            display: inline-block; /* Ensure highlight wraps text */
+        }
+
+        /* Specific font sizes for preview */
+        .preview-manufacturer-product { font-size: 30pt; } /* Common for Obst&Gemüse */
+        .preview-additional-info { font-size: 18pt; }
+        .preview-qty-unit { font-size: 20pt; }
+        .preview-price { font-size: 65pt; font-family: 'Times New Roman', serif; }
+        .preview-price-unit { font-size: 16pt; font-family: 'Times New Roman', serif; }
+        .preview-wiege-nr { font-size: 28pt; }
+        .preview-deposit { font-size: 14pt; }
+        .preview-packaging-type { font-size: 30pt; }
+
+        /* Trocken Sortiment specific font sizes */
+        .preview-trocken-manufacturer-product { font-size: 36pt; }
+        .preview-trocken-varieties { font-size: 20pt; }
+        .preview-trocken-qty-unit { font-size: 22pt; }
+        .preview-trocken-price { font-size: 70pt; font-family: 'Times New Roman', serif; }
+        .preview-trocken-price-unit { font-size: 18pt; font-family: 'Times New Roman', serif; }
+
+        /* Getränke specific font sizes */
+        .preview-getraenke-manufacturer-product { font-size: 36pt; }
+        .preview-getraenke-varieties { font-size: 20pt; }
+        .preview-getraenke-qty-unit { font-size: 22pt; }
+        .preview-getraenke-price { font-size: 70pt; font-family: 'Times New Roman', serif; }
+        .preview-getraenke-price-unit { font-size: 18pt; font-family: 'Times New Roman', serif; }
+        .preview-getraenke-deposit { font-size: 14pt; }
+        .preview-getraenke-packaging-type { font-size: 30pt; }
+
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Title - Modern and prominent */
+        h1 {
+            text-align: center;
+            color: #2a2a4a; /* Dark accent color */
+            margin-bottom: 45px;
+            font-size: 2.5em; /* Slightly adjusted size */
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Form Group - Clean spacing */
+        .form-group {
+            margin-bottom: 22px; /* Consistent vertical space */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        /* Labels - Clear and readable */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #444; /* Slightly softer dark for labels */
+            font-weight: 500;
+            font-size: 1em;
+            text-align: left;
+            width: 100%;
+        }
+
+        /* Input, Select Fields - Sleek design */
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 16px; /* Adjusted padding */
+            border: 1px solid #e0e0e0; /* Light, subtle border */
+            border-radius: 8px; /* Rounded corners */
+            font-size: 1em;
+            color: #333;
+            background-color: #f9f9f9; /* Very light background */
+            transition: all 0.2s ease-in-out;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: #6a0572; /* Dark purple accent on focus */
+            box-shadow: 0 0 0 3px rgba(106, 5, 114, 0.2); /* Soft focus glow */
+            outline: none;
+        }
+
+        /* Checkbox/Radio Groups */
+        input[type="checkbox"],
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.1); /* Slightly smaller scale for modern look */
+            accent-color: #6a0572; /* Dark purple accent for selected state */
+        }
+        .checkbox-group label, .radio-group label {
+            font-size: 0.95em; /* Slightly smaller font */
+            margin-bottom: 0;
+            padding-right: 20px;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            color: #444;
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* Space between buttons */
+            margin-top: 35px; /* Space above buttons */
+        }
+
+        /* Buttons - Modern and sleek */
+        button {
+            padding: 14px 28px; /* Adjusted padding */
+            border: none;
+            border-radius: 10px; /* Rounded corners */
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        button.submit {
+            background-color: #6a0572; /* Dark purple accent */
+            color: white;
+        }
+        button.submit:hover {
+            background-color: #52045a; /* Darker purple on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+        button.reset {
+            background-color: #8d99ae; /* Muted grey */
+            color: white;
+        }
+        button.reset:hover {
+            background-color: #7a8697;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Hidden Fields - Consistent with new theme */
+        .hidden-fields {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f0f0f0; /* Lighter grey for hidden sections */
+            border-radius: 12px;
+            border: 1px solid #e5e5e5; /* Subtle border */
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.03);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .main-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+            .form-container,
+            .preview-container {
+                min-width: unset; /* Remove min-width on smaller screens */
+                width: 100%;
+                max-width: 600px; /* Constrain width for better mobile viewing */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="form-container">
+            <h1>Plaka</h1>
+            <form id="priceForm" action="/" method="post">
+                <div class="form-group">
+                    <label for="department">Abteilung:</label>
+                    <select id="department" name="department" onchange="toggleDepartmentFields(); updatePreview();">
+                        <option value="Obst&Gemüse">Obst & Gemüse</option>
+                        <option value="Trocken Sortiment">Trocken Sortiment</option>
+                        <option value="Getränke">Getränke</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="product_type">Produkttyp:</label>
+                    <select id="product_type" name="product_type" onchange="updatePreview();">
+                        <option value="Standard">Standard</option>
+                        <option value="Aktion">Aktion</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="manufacturer">Hersteller:</label>
+                    <input type="text" id="manufacturer" name="manufacturer" placeholder="z.B. Coca-Cola, Lokaler Hof" oninput="updatePreview();">
+                </div>
+
+                <div class="form-group">
+                    <label for="product_name">Produktname:</label>
+                    <input type="text" id="product_name" name="product_name" required placeholder="z.B. Cola Zero, Frische Erdbeeren" oninput="updatePreview();">
+                </div>
+
+                <div class="form-group hidden-fields" id="additionalInfoGroup">
+                    <label for="additional_info">Zusatzinformation (z.B. Aus Spanien, Mix oder Rot, Geschmack):</label>
+                    <input type="text" id="additional_info" name="additional_info" placeholder="" oninput="updatePreview();">
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity_per_pack">Menge / Gebindegröße (z.B. 6x, 500g, 1.5L, 1kg):</label>
+                    <input type="text" id="quantity_per_pack" name="quantity_per_pack" required placeholder="z.B. 500, 1.5" oninput="updatePreview();">
+                </div>
+
+                <div class="form-group">
+                    <label for="unit">Einheit (z.B. g, kg, ml, L, Flasche, Stück, Kasten):</label>
+                    <input type="text" id="unit" name="unit" required placeholder="z.B. kg, L, Stück" oninput="updatePreview();">
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Preis (€):</label>
+                    <input type="number" id="price" name="price" step="0.01" required placeholder="z.B. 3.49" oninput="updatePreview();">
+                </div>
+                
+                <div class="form-group">
+                    <label for="price_category">Preiskategorie:</label>
+                    <select id="price_category" name="price_category" onchange="togglePriceCategory(); updatePreview();">
+                        <option value="Normal">Normal</option>
+                        <option value="WIEGE_NR">Wiege Nr.</option>
+                    </select>
+                </div>
+
+                <div class="form-group hidden-fields" id="wiegeNumberGroup">
+                    <label for="wiege_number">Wiege Nr.:</label>
+                    <input type="text" id="wiege_number" name="wiege_number" placeholder="z.B. 4022 (nur für Obst & Gemüse)" oninput="updatePreview();">
+                </div>
+
+                <div class="form-group">
+                    <label>Optionen:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="has_varieties" name="has_varieties" value="true" onchange="updatePreview();">
+                        <label for="has_varieties">Verschiedene Sorten</label>
+
+                        <input type="checkbox" id="is_bio" name="is_bio" value="true" onchange="updatePreview();">
+                        <label for="is_bio">BIO Produkt</label>
+                    </div>
+                </div>
+
+                <div class="form-group hidden-fields" id="beveragesFields">
+                    <label for="deposit">Pfand (€):</label>
+                    <input type="number" id="deposit" name="deposit" step="0.01" value="0.00" placeholder="z.B. 0.25" oninput="updatePreview();">
+
+                    <div class="form-group">
+                        <label>Verpackungsart:</label>
+                        <div class="radio-group">
+                            <input type="radio" id="einweg" name="packaging_type" value="Einweg" checked onchange="updatePreview();">
+                            <label for="einweg">Einweg</label>
+                            <input type="radio" id="mehrweg" name="packaging_type" value="Mehrweg" onchange="updatePreview();">
+                            <label for="mehrweg">Mehrweg</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="checkbox" id="is_gebinde" name="is_gebinde" value="true" onchange="toggleGebindeFields(); updatePreview();">
+                        <label for="is_gebinde">Gebinde (z.B. Sixpack)</label>
+                    </div>
+
+                    <div class="form-group hidden-fields" id="gebindeFields">
+                        <label for="gebinde_size">Gebinde Größe (Anzahl Flaschen/Dosen im Pack):</label>
+                        <input type="number" id="gebinde_size" name="gebinde_size" step="1" placeholder="z.B. 6" oninput="updatePreview();">
+
+                        <label for="inhalt_ml">Inhalt pro Flasche/Dose (ml):</label>
+                        <input type="number" id="inhalt_ml" name="inhalt_ml" step="0.01" placeholder="z.B. 330" oninput="updatePreview();">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="submit">Preisblatt Erstellen</button>
+                    <button type="reset" class="reset" onclick="setTimeout(updatePreview, 50);">Zurücksetzen</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="preview-container">
+            <h2>Live-Vorschau des Preisblatts</h2>
+            <div class="document-preview" id="livePreviewDocument">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to add a text element to the preview
+        function addPreviewText(parent, text, classes = [], style = {}, spacingAfterPt = 1) { // Added spacingAfterPt
+            if (!text && text !== 0) return; // Don't add if text is empty or null, but allow 0
+
+            const p = document.createElement('p');
+            p.textContent = text;
+            p.classList.add('preview-text');
+            classes.forEach(cls => p.classList.add(cls));
+            for (const key in style) {
+                p.style[key] = style[key];
+            }
+            // Convert points to pixels for margin-bottom
+            p.style.marginBottom = `${spacingAfterPt * 1.333333}px`; // 1pt = 1.333...px
+
+            parent.appendChild(p);
+        }
+
+        // Helper function to add an image to the preview
+        function addPreviewImage(parent, src, alt, maxWidth) {
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = alt;
+            img.classList.add('preview-logo');
+            img.style.maxWidth = maxWidth; // Set max width dynamically
+            parent.appendChild(img);
+        }
+
+        function toggleDepartmentFields() {
+            const department = document.getElementById('department').value;
+            const beveragesFields = document.getElementById('beveragesFields');
+            const wiegeNumberGroup = document.getElementById('wiegeNumberGroup');
+            const additionalInfoGroup = document.getElementById('additionalInfoGroup');
+
+            // 1. Hide ALL conditional field groups
+            beveragesFields.style.display = 'none';
+            wiegeNumberGroup.style.display = 'none';
+            additionalInfoGroup.style.display = 'none';
+
+            // 2. Clear values of ALL conditional fields to prevent sending stale data
+            document.getElementById('deposit').value = '0.00';
+            document.getElementById('einweg').checked = true; // Reset packaging type
+            document.getElementById('is_gebinde').checked = false; // Reset gebinde checkbox
+            document.getElementById('gebinde_size').value = ''; // Clear gebinde size
+            document.getElementById('inhalt_ml').value = ''; // Clear inhalt_ml
+
+            document.getElementById('wiege_number').value = ''; // Clear wiege number
+            document.getElementById('price_category').value = 'Normal'; // Reset price category to Normal
+            document.getElementById('is_bio').checked = false; // Reset bio checkbox
+
+            document.getElementById('additional_info').value = ''; // Ensure additional_info is cleared
+
+            // Call toggleGebindeFields to hide its sub-fields if is_gebinde was checked and now reset
+            toggleGebindeFields();
+
+            // 3. Show fields based on the selected department
+            if (department === 'Getränke') {
+                beveragesFields.style.display = 'block';
+                additionalInfoGroup.style.display = 'block'; // For "Zero", "Geschmack" etc.
+            } else if (department === 'Obst&Gemüse') {
+                additionalInfoGroup.style.display = 'block'; // For "Aus Spanien", "Mix oder Rot"
+                // wiegeNumberGroup is handled by togglePriceCategory, which is called next
+            } else {
+                // For 'Trocken Sortiment' - no specific hidden fields beyond defaults
+                // All remain hidden as per initial reset
+            }
+
+            // 4. Always call togglePriceCategory last, as its visibility depends on department
+            togglePriceCategory();
+
+            // Finally, update the live preview (will be called by onchange event of department select)
+            // updatePreview(); // This is already triggered by the onchange event
+        }
+
+        function togglePriceCategory() {
+            const priceCategory = document.getElementById('price_category').value;
+            const wiegeNumberGroup = document.getElementById('wiegeNumberGroup');
+            const department = document.getElementById('department').value;
+
+            // "Wiege Nr." is only available for "Obst & Gemüse" when "Wiege Nr." price category is selected.
+            if (department === 'Obst&Gemüse' && priceCategory === 'WIEGE_NR') {
+                wiegeNumberGroup.style.display = 'block';
+            } else {
+                wiegeNumberGroup.style.display = 'none';
+                document.getElementById('wiege_number').value = ''; // Clear value when hidden or not applicable
+            }
+        }
+
+        function toggleGebindeFields() {
+            const isGebindeCheckbox = document.getElementById('is_gebinde');
+            const gebindeFields = document.getElementById('gebindeFields');
+            if (isGebindeCheckbox.checked) {
+                gebindeFields.style.display = 'block';
+            } else {
+                gebindeFields.style.display = 'none';
+                document.getElementById('gebinde_size').value = '';
+                document.getElementById('inhalt_ml').value = '';
+            }
+        }
+
+        function updatePreview() {
+            const previewDiv = document.getElementById('livePreviewDocument');
+            previewDiv.innerHTML = ''; // Clear previous content
+
+            const department = document.getElementById('department').value;
+            const productType = document.getElementById('product_type').value;
+            const manufacturer = document.getElementById('manufacturer').value.trim();
+            const productName = document.getElementById('product_name').value.trim();
+            const hasVarieties = document.getElementById('has_varieties').checked;
+            const additionalInfo = document.getElementById('additional_info').value.trim();
+            const quantityPerPackStr = document.getElementById('quantity_per_pack').value.trim();
+            const unit = document.getElementById('unit').value.trim();
+            const price = parseFloat(document.getElementById('price').value);
+            const deposit = parseFloat(document.getElementById('deposit').value || '0.00');
+            const packagingType = document.querySelector('input[name="packaging_type"]:checked')?.value || '';
+            const isBio = document.getElementById('is_bio').checked;
+            const priceCategory = document.getElementById('price_category').value;
+            const wiegeNumber = document.getElementById('wiege_number').value.trim();
+            const isGebinde = document.getElementById('is_gebinde').checked;
+            const gebindeSize = parseInt(document.getElementById('gebinde_size').value) || 0;
+            const inhaltMl = parseFloat(document.getElementById('inhalt_ml').value) || 0;
+
+            const shouldBeRed = (productType === 'Aktion');
+
+            // --- Logo Selection and Insertion based on Hierarchy ---
+            let logoSrc = '';
+            let logoAlt = '';
+            let logoWidth = '1.1in'; // Default width for Kemper/Standard
+
+            if (department === 'Obst&Gemüse' && isBio) {
+                logoSrc = '/static/bio_logo.png'; // Actual Bio logo path
+                logoAlt = 'BIO Logo';
+                logoWidth = '1.5in'; // Custom larger width for Bio logo
+            } else if (productType === 'Aktion') {
+                logoSrc = '/static/sonder_angebot_logo.png'; // Actual Aktion logo path
+                logoAlt = 'AKTION Logo';
+                logoWidth = '1.32in'; // Custom width for Aktion logo
+            } else {
+                logoSrc = '/static/kemper_markt_logo.png'; // Actual Kemper logo path
+                logoAlt = 'KEMPER MARKT Logo';
+                logoWidth = '1.1in';
+            }
+            addPreviewImage(previewDiv, logoSrc, logoAlt, logoWidth);
+
+            // Add an empty line between logo and first text element ONLY for Obst&Gemüse
+            if (department === 'Obst&Gemüse') {
+                const emptyLine = document.createElement('div');
+                emptyLine.classList.add('preview-empty-line-lg');
+                previewDiv.appendChild(emptyLine);
+            }
+
+            // --- Main Content based on Department ---
+            if (department === 'Obst&Gemüse') {
+                // Manufacturer and Product Name
+                if (manufacturer) {
+                    addPreviewText(previewDiv, manufacturer, ['bold', 'preview-manufacturer-product'], {}, 0); // Spacing adjusted
+                } else {
+                    addPreviewText(previewDiv, "", ['bold', 'preview-manufacturer-product'], {}, 0); // Placeholder empty line, spacing adjusted
+                }
+                addPreviewText(previewDiv, productName, ['bold', 'preview-manufacturer-product'], {}, 0); // Spacing adjusted
+                
+                // Additional Info
+                if (additionalInfo) {
+                    addPreviewText(previewDiv, additionalInfo, ['preview-additional-info']);
+                }
+                
+                // Wiege Nr. or Quantity/Unit line
+                if (priceCategory === 'WIEGE_NR' && wiegeNumber) {
+                    addPreviewText(previewDiv, `Wiege Nr. ${wiegeNumber}`, ['bold', 'highlight', 'preview-wiege-nr']);
+                } else {
+                    let containerWordObsgem = "Packung";
+                    if (unit.toLowerCase().includes("tüte")) containerWordObsgem = "Tüte";
+                    else if (unit.toLowerCase().includes("schale")) containerWordObsgem = "Schale";
+                    else if (unit.toLowerCase().includes("stück")) containerWordObsgem = "Stück";
+                    else if (unit.toLowerCase().includes("flasche")) containerWordObsgem = "Flasche";
+
+                    addPreviewText(previewDiv, `Je ${quantityPerPackStr}${unit} ${containerWordObsgem}`, ['highlight', 'preview-qty-unit']);
+                }
+
+                // Price
+                if (!isNaN(price)) {
+                    addPreviewText(previewDiv, `${price.toFixed(2).replace('.', ',')}€`, ['bold', 'preview-price', shouldBeRed ? 'red' : ''], {}, 0); // Spacing adjusted
+                }
+
+                // Price per unit text
+                let pricePerUnitText = "";
+                try {
+                    if (unit.toLowerCase().includes("g") || unit.toLowerCase().includes("kg") || unit.toLowerCase().includes("ml") || unit.toLowerCase().includes("l")) {
+                        let calcQuantity = 0.0;
+                        if (quantityPerPackStr.includes('/')) {
+                            const quantities = quantityPerPackStr.split('/').map(q => parseFloat(q));
+                            const pricesPerUnitCalc = [];
+                            for (const q of quantities) {
+                                if (q === 0) { pricesPerUnitCalc.push(0.0); continue; }
+                                if (unit.toLowerCase() === "g") pricesPerUnitCalc.push((price / q) * 1000);
+                                else if (unit.toLowerCase() === "kg") pricesPerUnitCalc.push(price / q);
+                                else if (unit.toLowerCase() === "ml") pricesPerUnitCalc.push((price / q) * 1000);
+                                else if (unit.toLowerCase() === "l") pricesPerUnitCalc.push(price / q);
+                            }
+                            const formattedPrices = pricesPerUnitCalc.map(p => p.toFixed(2).replace('.', ','));
+                            pricePerUnitText = formattedPrices.join("/");
+                            if (unit.toLowerCase() === "g" || unit.toLowerCase() === "kg") pricePerUnitText = `1kg=${pricePerUnitText}€`;
+                            else if (unit.toLowerCase() === "ml" || unit.toLowerCase() === "l") pricePerUnitText = `1L=${pricePerUnitText}€`;
+                        } else {
+                            calcQuantity = parseFloat(quantityPerPackStr);
+                            if (calcQuantity > 0) {
+                                if (unit.toLowerCase() === "g") pricePerUnitText = `1kg=${((price / calcQuantity) * 1000).toFixed(2).replace('.', ',')}€`;
+                                else if (unit.toLowerCase() === "kg") pricePerUnitText = `1kg=${(price / calcQuantity).toFixed(2).replace('.', ',')}€`;
+                                else if (unit.toLowerCase() === "ml") pricePerUnitText = `1L=${((price / calcQuantity) * 1000).toFixed(2).replace('.', ',')}€`;
+                                else if (unit.toLowerCase() === "l") pricePerUnitText = `1L=${(price / calcQuantity).toFixed(2).replace('.', ',')}€`;
+                            }
+                        }
+                    }
+                } catch (e) { /* silent fail */ }
+
+                if (pricePerUnitText) {
+                    addPreviewText(previewDiv, pricePerUnitText, ['preview-price-unit', shouldBeRed ? 'red' : '']);
+                }
+
+            } else if (department === 'Trocken Sortiment') {
+                // Manufacturer and Product Name
+                if (manufacturer) {
+                    addPreviewText(previewDiv, manufacturer, ['bold', 'preview-trocken-manufacturer-product'], {}, 0); // Spacing adjusted
+                } else {
+                    addPreviewText(previewDiv, "", ['bold', 'preview-trocken-manufacturer-product'], {}, 0); // Placeholder empty line, spacing adjusted
+                }
+                addPreviewText(previewDiv, productName, ['bold', 'preview-trocken-manufacturer-product'], {}, 0); // Spacing adjusted
+                
+                // Varieties
+                if (hasVarieties) {
+                    addPreviewText(previewDiv, "Verschiedene Sorten", ['preview-trocken-varieties']);
+                }
+
+                // Quantity/Unit line
+                let containerWord = "Packung";
+                if (unit.toLowerCase().includes("glas")) containerWord = "Glas";
+                else if (unit.toLowerCase().includes("dose")) containerWord = "Dose";
+                else if (unit.toLowerCase() === "stück") containerWord = "Stück";
+                else if (unit.toLowerCase() === "tüte") containerWord = "Tüte";
+                else if (unit.toLowerCase() === "schale") containerWord = "Schale";
+                else if (unit.toLowerCase() === "träger") containerWord = "Träger";
+                else if (unit.toLowerCase() === "kg" && !productName.toLowerCase().match(/beutel|packung|tüte|schale/)) containerWord = "Packung";
+
+                addPreviewText(previewDiv, `Je ${quantityPerPackStr}${unit} ${containerWord}`, ['highlight', 'preview-trocken-qty-unit']);
+
+                // Price
+                if (!isNaN(price)) {
+                    addPreviewText(previewDiv, `${price.toFixed(2).replace('.', ',')}€`, ['bold', 'preview-trocken-price', shouldBeRed ? 'red' : ''], {}, 0); // Spacing adjusted
+                }
+
+                // Price per unit text
+                let pricePerUnitText = "";
+                try {
+                    if (unit.toLowerCase().includes("g") || unit.toLowerCase().includes("kg") || unit.toLowerCase().includes("ml") || unit.toLowerCase().includes("l")) {
+                        let calcQuantity = 0.0;
+                        if (quantityPerPackStr.includes('/')) {
+                            const quantities = quantityPerPackStr.split('/').map(q => parseFloat(q));
+                            const pricesPerUnitCalc = [];
+                            for (const q of quantities) {
+                                if (q === 0) { pricesPerUnitCalc.push(0.0); continue; }
+                                if (unit.toLowerCase() === "g") pricesPerUnitCalc.push((price / q) * 1000);
+                                else if (unit.toLowerCase() === "kg") pricesPerUnitCalc.push(price / q);
+                                else if (unit.toLowerCase() === "ml") pricesPerUnitCalc.push((price / q) * 1000);
+                                else if (unit.toLowerCase() === "l") pricesPerUnitCalc.push(price / q);
+                            }
+                            const formattedPrices = pricesPerUnitCalc.map(p => p.toFixed(2).replace('.', ','));
+                            pricePerUnitText = formattedPrices.join("/");
+                            if (unit.toLowerCase() === "g" || unit.toLowerCase() === "kg") pricePerUnitText = `1kg=${pricePerUnitText}€`;
+                            else if (unit.toLowerCase() === "ml" || unit.toLowerCase() === "l") pricePerUnitText = `1L=${pricePerUnitText}€`;
+                        } else {
+                            calcQuantity = parseFloat(quantityPerPackStr);
+                            if (calcQuantity > 0) {
+                                if (unit.toLowerCase() === "g") pricePerUnitText = `1kg=${((price / calcQuantity) * 1000).toFixed(2).replace('.', ',')}€`;
+                                else if (unit.toLowerCase() === "kg") pricePerUnitText = `1kg=${(price / calcQuantity).toFixed(2).replace('.', ',')}€`;
+                                else if (unit.toLowerCase() === "ml") pricePerUnitText = `1L=${((price / calcQuantity) * 1000).toFixed(2).replace('.', ',')}€`;
+                                else if (unit.toLowerCase() === "l") pricePerUnitText = `1L=${(price / calcQuantity).toFixed(2).replace('.', ',')}€`;
+                            }
+                        }
+                    }
+                } catch (e) { /* silent fail */ }
+
+                if (pricePerUnitText) {
+                    addPreviewText(previewDiv, pricePerUnitText, ['preview-trocken-price-unit', shouldBeRed ? 'red' : '']);
+                }
+
+            } else if (department === 'Getränke') {
+                // Manufacturer and Product Name
+                if (manufacturer) {
+                    addPreviewText(previewDiv, manufacturer, ['bold', 'preview-getraenke-manufacturer-product'], {}, 0); // Spacing adjusted
+                } else {
+                    addPreviewText(previewDiv, "", ['bold', 'preview-getraenke-manufacturer-product'], {}, 0); // Placeholder empty line, spacing adjusted
+                }
+                addPreviewText(previewDiv, productName, ['bold', 'preview-getraenke-manufacturer-product'], {}, 0); // Spacing adjusted
+
+                // Varieties
+                if (hasVarieties) {
+                    addPreviewText(previewDiv, "Verschiedene Sorten", ['preview-getraenke-varieties']);
+                }
+
+                // Quantity/Unit line
+                addPreviewText(previewDiv, `Je ${quantityPerPackStr}${unit}`, ['highlight', 'preview-getraenke-qty-unit']);
+
+                // Price
+                if (!isNaN(price)) {
+                    addPreviewText(previewDiv, `${price.toFixed(2).replace('.', ',')}€`, ['bold', 'preview-getraenke-price', shouldBeRed ? 'red' : ''], {}, 0); // Spacing adjusted
+                }
+
+                // Deposit
+                if (deposit > 0) {
+                    addPreviewText(previewDiv, `Zzgl.: ${deposit.toFixed(2).replace('.', ',')}€ Pfand`, ['bold', 'preview-getraenke-deposit', shouldBeRed ? 'red' : '']);
+                }
+
+                // Gebinde Price Per Unit/Liter calculation and display
+                if (isGebinde && gebindeSize > 0 && inhaltMl > 0) {
+                    const totalVolumeMl = gebindeSize * inhaltMl;
+                    if (totalVolumeMl > 0) {
+                        const pricePerLiterGebinde = (price / totalVolumeMl) * 1000;
+                        const pricePerItemGebinde = price / gebindeSize;
+                        const gebindePriceText = `1 St.=${pricePerItemGebinde.toFixed(2).replace('.', ',')}€ / 1L=${pricePerLiterGebinde.toFixed(2).replace('.', ',')}€`;
+                        addPreviewText(previewDiv, gebindePriceText, ['bold', 'preview-getraenke-deposit', shouldBeRed ? 'red' : '']); // Using deposit font size
+                    }
+                } else { // Display general price_per_unit_text only if not Gebinde
+                    let pricePerUnitText = "";
+                    try {
+                        if (unit.toLowerCase().includes("g") || unit.toLowerCase().includes("kg") || unit.toLowerCase().includes("ml") || unit.toLowerCase().includes("l")) {
+                            let calcQuantity = 0.0;
+                            if (quantityPerPackStr.includes('/')) {
+                                const quantities = quantityPerPackStr.split('/').map(q => parseFloat(q));
+                                const pricesPerUnitCalc = [];
+                                for (const q of quantities) {
+                                    if (q === 0) { pricesPerUnitCalc.push(0.0); continue; }
+                                    if (unit.toLowerCase() === "g") pricesPerUnitCalc.push((price / q) * 1000);
+                                    else if (unit.toLowerCase() === "kg") pricesPerUnitCalc.push(price / q);
+                                    else if (unit.toLowerCase() === "ml") pricesPerUnitCalc.push((price / q) * 1000);
+                                    else if (unit.toLowerCase() === "l") pricesPerUnitCalc.push(price / q);
+                                }
+                                const formattedPrices = pricesPerUnitCalc.map(p => p.toFixed(2).replace('.', ','));
+                                pricePerUnitText = formattedPrices.join("/");
+                                if (unit.toLowerCase() === "g" || unit.toLowerCase() === "kg") pricePerUnitText = `1kg=${pricePerUnitText}€`;
+                                else if (unit.toLowerCase() === "ml" || unit.toLowerCase() === "l") pricePerUnitText = `1L=${pricePerUnitText}€`;
+                            } else {
+                                calcQuantity = parseFloat(quantityPerPackStr);
+                                if (calcQuantity > 0) {
+                                    if (unit.toLowerCase() === "g") pricePerUnitText = `1kg=${((price / calcQuantity) * 1000).toFixed(2).replace('.', ',')}€`;
+                                    else if (unit.toLowerCase() === "kg") pricePerUnitText = `1kg=${(price / calcQuantity).toFixed(2).replace('.', ',')}€`;
+                                    else if (unit.toLowerCase() === "ml") pricePerUnitText = `1L=${((price / calcQuantity) * 1000).toFixed(2).replace('.', ',')}€`;
+                                    else if (unit.toLowerCase() === "l") pricePerUnitText = `1L=${(price / calcQuantity).toFixed(2).replace('.', ',')}€`;
+                                }
+                            }
+                        }
+                    } catch (e) { /* silent fail */ }
+
+                    if (pricePerUnitText) {
+                        addPreviewText(previewDiv, pricePerUnitText, ['preview-getraenke-price-unit', shouldBeRed ? 'red' : '']);
+                    }
+                }
+                
+                // Packaging Type
+                if (packagingType) {
+                    addPreviewText(previewDiv, packagingType.toUpperCase(), ['bold', 'underline', 'preview-getraenke-packaging-type']);
+                }
+            }
+        }
+
+        // Initial calls to set correct visibility and update preview on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleDepartmentFields();
+            updatePreview();
+        });
+    </script>
+</body>
+</html>
